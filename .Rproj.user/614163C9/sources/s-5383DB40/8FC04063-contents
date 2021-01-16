@@ -1,0 +1,156 @@
+---
+title: "ESM 244 Lab Week 2"
+author: "Sydney Rilum"
+date: "1/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(here)
+library(palmerpenguins)
+
+# For PCA:
+library(ggfortify)
+
+# For ggplot customization:
+library(readxl)
+library(gghighlight)
+library(lubridate)
+library(plotly)
+
+# To make compound figures:
+library(patchwork)
+```
+
+## Part 1: PCA with penguins
+
+```{r}
+penguins_pca <- penguins %>% 
+  select(body_mass_g, ends_with("_mm")) %>%  # keeps variables in mm units
+  drop_na() %>% 
+  scale() %>%  # values scaled
+  prcomp() # makes data frame into a list of info
+
+penguins_pca$rotation  # brings up loadings for each variables
+
+# Create a dataset that drops NAs but contains all 8 variables to add aesthetics to biplot, matches PCA dataset
+penguin_complete <- penguins %>% 
+  drop_na(body_mass_g, ends_with("_mm"))
+
+# Create a biplot using autoplot (from ggfortify)
+autoplot(penguins_pca,
+         data = penguin_complete,
+         colour = 'species',
+         loadings = TRUE,
+         loadings.label = TRUE) + # shows loadings of each variable
+  theme_minimal() # can customize just like ggplot
+```
+
+## Part 2: ggplot2 customization & reading in different file types
+
+### Read in an .xlsx file & do some wrangling
+
+```{r}
+fish_noaa <- read_excel(here("data", "foss_landings.xlsx")) %>% 
+  clean_names() %>% 
+  mutate(across(where(is.character), tolower)) %>%  # convert observations in character class columns to lowercase
+  mutate(nmfs_name = str_sub(nmfs_name, end = -4)) %>%  # remove last 4 characters in each observation in nmfs column
+  filter(confidentiality == "public")
+```
+
+Make a customized graph:
+```{r}
+# Store graph
+fish_plot <- ggplot(data = fish_noaa, aes(x = year, y = pounds)) +
+  geom_line(aes(color = nmfs_name), show.legend = FALSE) +
+  theme_minimal()
+
+# Call graph
+fish_plot
+
+# Make an interactive graph
+ggplotly(fish_plot)
+
+# Use gghighlight to highlight certain series of data
+ggplot(data = fish_noaa, aes(x = year, y = pounds, group = nmfs_name)) + # groups by diff series
+  geom_line() +
+  theme_minimal() +
+  gghighlight(nmfs_name == "tunas") 
+
+ggplot(data = fish_noaa, aes(x = year, y = pounds, group = nmfs_name)) + 
+  geom_line(aes(color = nmfs_name)) + # gghighlight assumes you only want to highlight conditional series
+  theme_minimal() +
+  gghighlight(max(pounds) > 1e8) # looks for any series in data set where max value is greater than 1x10^8
+```
+
+### Read in data from URL, `lubridate()`, `mutate()`, make a graph with months in logical order
+
+```{r}
+monroe_wt <- read_csv("https://data.bloomington.in.gov/dataset/2c81cfe3-62c2-46ed-8fcf-83c1880301d1/resource/13c8f7aa-af51-4008-80a9-56415c7c931e/download/mwtpdailyelectricitybclear.csv") %>% 
+  clean_names()
+```
+
+Create a new subset:
+- Makes date column recognizable to R
+- Extract the month from date column
+- Adds new column for month abbreviation
+- Convert month name to a factor not character to be in order on graph
+
+```{r}
+monroe_ts <- monroe_wt %>% 
+  mutate(date = mdy(date)) %>% 
+  mutate(record_month = month(date)) %>% 
+  mutate(month_name = month.abb[record_month]) %>% 
+  mutate(month_name = fct_reorder(month_name, record_month))
+
+ggplot(data = monroe_ts, aes(month_name, y = total_k_wh)) +
+  geom_jitter()
+  
+```
+
+## Part 3: Compound figures with `patchwork`
+Let's you put multiple graphs (and tables) together into a single figure, that's completely customizable.
+
+```{r}
+graph_a <- ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm)) +
+  geom_point()
+
+graph_b <- ggplot(data = penguins, aes(x = species, y = flipper_length_mm)) +
+  geom_jitter(aes(color = species), show.legend = FALSE)
+
+# Use | to put graphs side by side
+# Use / to put graphs one over the other
+
+graph_c <- (graph_a | graph_b) / fish_plot & theme_dark()
+
+graph_c
+
+# HOW TO SAVE A GRAPH AS A JPG OR PNG !!!!
+ggsave(here("fig","graph_c_sr.png"), width = 5, height = 6)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
