@@ -1,0 +1,11 @@
+---
+title: "ESM 244 Assignment 1 Task 1"
+author: "Sydney Rilum"
+date: "1/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+

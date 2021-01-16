@@ -1,0 +1,73 @@
+---
+title: "ESM 244 Assignment 1 Task 1"
+author: "Sydney Rilum"
+date: "1/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(janitor)
+library(here)
+library(readxl)
+library(lubridate) # For easier dates & times
+library(gghighlight) # For useful highlighting
+library(plotly) # Interactive graphs
+library(patchwork) # For compound figures
+```
+
+## Introduction
+
+
+
+
+```{r}
+# Read in .xlsx file and clean up data
+frogs <- read_excel(here("data","sierra_amphibians.xlsx")) %>% 
+  mutate(across(where(is.character), tolower)) # convert all characters to lowercase 
+```
+
+A graph of total mountain yellow-legged frog (Rana muscosa) count each year across all water bodies, by life stage excluding the ‘EggMass’ level. In other words, you should find the total number of adult, subadult, and tadpole yellow-legged frogs observed in the entire study region by life stage and year, but you will not use the lake ID or amphibian_location in your analyses as additional grouping variables (thanks Elmera Azadpour for clarifying). Hint: Convert the date to a date with the {lubridate} package, then pull just the year using the lubridate::year() function...then you can group by year to get counts. 
+
+```{r}
+# Create a subset of data for mountain yellow-frog counts
+yellow_frog_count <- frogs %>% 
+  select(survey_date, amphibian_species, amphibian_life_stage, amphibian_number) %>% 
+  filter(amphibian_species == "ramu") %>%   # filter for RAMU species
+  filter(amphibian_life_stage != "eggmass") %>%   # remove eggmass life stage
+  mutate(year = year(survey_date)) %>%   # make new column with year only
+  group_by(year, amphibian_life_stage) %>%   # group by year and life stage
+  summarize(total_count = sum(amphibian_number, na.rm = TRUE))  # add up total counts for each life stage each year
+
+ggplot(data = yellow_frog_count, aes(x = year, y = total_count)) +
+  geom_col(aes(fill = amphibian_life_stage)) +
+  facet_wrap(~ amphibian_life_stage) +
+  labs(x = "Year",
+       y = "Total Count",
+       title = "Total Count of Mountain Yellow-Legged Frog") +
+  theme_light() +
+  theme(legend.position = "none")
+  
+```
+
+A column graph containing total counts (over all years of the study) of combined adult and subadult endangered mountain yellow-legged frogs (Rana muscosa) observed in the 5 lakes with the greatest total observed counts. In other words, this graph will have at least 5 columns (OK to have more if there are ties - thanks Michelle Shteyn), with Lake ID (these aren’t specified in the dataset for confidentiality) as the categorical label on one axis, and total yellow-legged frog counts (adult + subadult counts) in the dataset on the other axis. Make sure they’re in high-to-low or low-to-high order by total yellow-legged frog counts. You should exclude tadpoles for this graph. Note: Consider reformatting the lake ID from just a number to a label like “Lake 10025”), then use fct_reorder to convert it to an ordered factor.
+
+```{r}
+# Create a new subset of data for mountain yellow-frog counts
+yellow_frog_count_lakes <- frogs %>% 
+  select(lake_id, amphibian_species, amphibian_life_stage, amphibian_number) %>% 
+  filter(amphibian_species == "ramu") %>%   # filter for RAMU species
+  filter(amphibian_life_stage == c("adult", "subadult"))  # filter for adult and subadult frogs only
+
+
+```
+
+
+
+Combine your two graphs into a single compound figure using the {patchwork} package. Add a finalized figure caption that appears below the compound figure in your knitted html. Note: You might realize once you combine your graphs into a single compound figure, you need to update the formatting (e.g. move legends or instead directly label, etc.). You should customize as necessary to make it a professional final output.
+
+
+## Data Citation
+
+[Knapp, R.A., C. Pavelka, E.E. Hegeman, and T.C. Smith. 2020. The Sierra Lakes Inventory Project: Non-Native fish and community composition of lakes and ponds in the Sierra Nevada, California ver 2. Environmental Data Initiative.](https://doi.org/10.6073/pasta/d835832d7fd00d9e4466e44eea87fab3)
