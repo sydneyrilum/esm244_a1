@@ -1,7 +1,0 @@
-"0","# Create a new subset of data for mountain yellow-frog counts"
-"0","yellow_frog_count_lakes <- frogs %>% "
-"0","  select(lake_id, amphibian_species, amphibian_life_stage, amphibian_number) %>% "
-"0","  filter(amphibian_species == ""ramu"") %>%   # filter for RAMU species"
-"0","  filter(amphibian_life_stage == c(""adult"", ""subadult""))  "
-"0",""
-"0",""
