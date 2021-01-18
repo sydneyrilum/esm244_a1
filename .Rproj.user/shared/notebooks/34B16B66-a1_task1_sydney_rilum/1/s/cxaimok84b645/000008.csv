@@ -1,5 +1,0 @@
-"0","# Read in .xlsx file and clean up data"
-"0","frogs <- read_excel(here(""data"",""sierra_amphibians.xlsx"")) %>% "
-"0","  mutate(across(where(is.character), tolower)) # convert all characters to lowercase "
-"2","Error: `path` does not exist: ‘/Users/Sydney/Desktop/ESM 244- Advanced Data Analysis/assignments/esm244_a1/data/sierra_amphibians.xlsx’
-"

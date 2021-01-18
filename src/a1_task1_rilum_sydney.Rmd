@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(tidyverse)
 library(janitor)
 library(here)
@@ -19,13 +19,12 @@ library(patchwork) # For compound figures
 
 ## Introduction
 
-
 ```{r}
 # Read in .xlsx file and clean up data
 frogs <- read_excel(here("data","sierra_amphibians.xlsx")) %>% 
   mutate(across(where(is.character), tolower)) # convert all characters to lowercase 
 
-
+frogs$lake_id <- as.character(as.numeric(frogs$lake_id)) # converts from numeric to character class
 ```
 
 A graph of total mountain yellow-legged frog (Rana muscosa) count each year across all water bodies, by life stage excluding the ‘EggMass’ level. In other words, you should find the total number of adult, subadult, and tadpole yellow-legged frogs observed in the entire study region by life stage and year, but you will not use the lake ID or amphibian_location in your analyses as additional grouping variables (thanks Elmera Azadpour for clarifying). Hint: Convert the date to a date with the {lubridate} package, then pull just the year using the lubridate::year() function...then you can group by year to get counts. 
@@ -40,24 +39,18 @@ yellow_frog_count <- frogs %>%
   group_by(year, amphibian_life_stage) %>%   # group by year and life stage
   summarize(total_count = sum(amphibian_number, na.rm = TRUE))  # add up total counts for each life stage each year
 
-ggplot(data = yellow_frog_count, aes(x = year, y = total_count)) +
+graph_a <- ggplot(data = yellow_frog_count, aes(x = year, y = total_count)) +
   geom_col(aes(fill = amphibian_life_stage)) +
   facet_wrap(~ amphibian_life_stage) +
   labs(x = "Year",
        y = "Total Count",
-       title = "Total Mountain Yellow-Legged Frog Count by Life Stage") +
-  theme_light() +
-  theme(legend.position = "none")
+       title = "Total Mountain Yellow-Legged Frog Counts by Life Stage") 
   
 ```
 
 A column graph containing total counts (over all years of the study) of combined adult and subadult endangered mountain yellow-legged frogs (Rana muscosa) observed in the 5 lakes with the greatest total observed counts. In other words, this graph will have at least 5 columns (OK to have more if there are ties - thanks Michelle Shteyn), with Lake ID (these aren’t specified in the dataset for confidentiality) as the categorical label on one axis, and total yellow-legged frog counts (adult + subadult counts) in the dataset on the other axis. Make sure they’re in high-to-low or low-to-high order by total yellow-legged frog counts. You should exclude tadpoles for this graph. Note: Consider reformatting the lake ID from just a number to a label like “Lake 10025”), then use fct_reorder to convert it to an ordered factor.
 
 ```{r}
-
-
-
-
 # Create a new subset of data for mountain yellow-frog counts
 yellow_frog_count_lakes <- frogs %>% 
   select(lake_id, amphibian_species, amphibian_life_stage, amphibian_number) %>% 
@@ -65,19 +58,28 @@ yellow_frog_count_lakes <- frogs %>%
   filter(amphibian_life_stage == c("adult", "subadult")) %>%  # filter for adult and subadult frogs only
   group_by(lake_id) %>%   # group by lake ID
   summarize(count = sum(amphibian_number, na.rm = TRUE)) %>% 
+  mutate(lake_id = fct_reorder(lake_id, count)) %>%
   slice_max(count, n = 5)
 
-#frogs$lake_id <- as.character(as.numeric(frogs$lake_id)) 
-
-
-#ggplot(data = yellow_frog_count_lakes, aes(y = lake_id, x = count)) +
-  geom_col() 
+graph_b <- ggplot(data = yellow_frog_count_lakes, aes(y = lake_id, x = count)) +
+  geom_col(fill = "gold2") +
+  labs(x = "Total adult and subadult frog counts",
+       y = "Lake ID",
+       title = "Top 5 Lakes with Largest Total Mountain Yellow-Legged Frog Count")
 
 ```
 
 
-
 Combine your two graphs into a single compound figure using the {patchwork} package. Add a finalized figure caption that appears below the compound figure in your knitted html. Note: You might realize once you combine your graphs into a single compound figure, you need to update the formatting (e.g. move legends or instead directly label, etc.). You should customize as necessary to make it a professional final output.
+
+```{r}
+# Use | to put graphs side by side, and / to put one over the other. 
+graph_a / graph_b & theme_light() +
+  theme(legend.position = "none")
+
+```
+
+**Figure 1.** (*rAMU*) species.  Data: Knapp et al. (2020).
 
 
 ## Data Citation

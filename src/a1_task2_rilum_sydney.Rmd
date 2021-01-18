@@ -1,0 +1,89 @@
+---
+title: "ESM 244 Assignment 1 Task 2"
+author: "Sydney Rilum"
+date: "1/16/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(janitor)
+library(here)
+
+
+library(lubridate) # For easier dates & times
+library(gghighlight) # For useful highlighting
+library(plotly) # Interactive graphs
+library(patchwork) # For compound figures
+
+
+# For Part 1 (PCA)
+library(ggfortify) # For PCA biplot
+
+```
+
+
+
+## Introduction 
+1) A useful descriptive introductory summary (3 - 4 sentences) that helps the audience understand the data (include a citation as necessary) and what you’ll be exploring
+
+This report provides an exploratory ....
+Principal components analysis is an ordination method allowing us to glean as much about our multivariate data as possible in a simplified number of dimensions. 
+
+explore variable relationships and clustering by species in a PCA biplot.
+
+
+## Principal Components Analysis (PCA)
+
+2) All of your organized and well-annotated code (with warnings/messages suppressed) you wrote to wrangle data then run PCA, and to create a professional looking PCA biplot that appears (with a caption) in your knitted HTML
+
+```{r}
+# Read in .csv file and clean up data
+world_envi <- read_csv(here("data", "world_env_vars.csv")) %>% 
+  clean_names()
+
+```
+
+
+```{r}
+# PCA
+penguin_pca <- penguins %>% 
+  dplyr::select(body_mass_g, ends_with("_mm")) %>%
+  tidyr::drop_na() %>%
+  scale() %>%
+  prcomp()
+
+penguin_complete <- penguins %>% 
+  drop_na(body_mass_g, ends_with("_mm"))
+
+autoplot(penguin_pca,
+         data = penguin_complete,
+         loadings = TRUE,
+         colour = 'species',
+         loadings.label = TRUE,
+         loadings.colour = "black",
+         loadings.label.colour = "black",
+         loadings.label.vjust = -0.5
+         ) +
+  scale_color_manual(values = c("blue","purple","orange")) +
+  scale_fill_manual(values = c("blue","purple","orange")) +
+  theme_minimal()
+
+# It's not perfect, but it's enough for now...
+
+# Variance explained by each PC
+screeplot(penguin_pca, type = "lines")
+
+# See the loadings (weighting for each principal component)
+penguin_pca$rotation
+
+```
+
+
+
+## Summary
+3) A brief summary (nicely formatted and professionally written bulletpoints are fine) highlighting some major takeaways from your PCA that can be gleaned from the biplot
+
+
+
