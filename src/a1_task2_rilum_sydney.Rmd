@@ -48,35 +48,44 @@ world_envi <- read_csv(here("data", "world_env_vars.csv")) %>%
 
 ```{r}
 # PCA
-penguin_pca <- penguins %>% 
-  dplyr::select(body_mass_g, ends_with("_mm")) %>%
-  tidyr::drop_na() %>%
-  scale() %>%
-  prcomp()
+world_pca <- world_envi %>% 
+  select(body_mass_g, ends_with("_mm")) %>%  # keeps variables in mm units
+  drop_na() %>% 
+  scale() %>%  # values scaled
+  prcomp() # makes data frame into a list of info
 
-penguin_complete <- penguins %>% 
+# Create a dataset that drops NAs but contains all 8 variables to add aesthetics to biplot, matches PCA dataset
+world_complete <- world_envi %>% 
   drop_na(body_mass_g, ends_with("_mm"))
 
-autoplot(penguin_pca,
-         data = penguin_complete,
-         loadings = TRUE,
-         colour = 'species',
-         loadings.label = TRUE,
-         loadings.colour = "black",
-         loadings.label.colour = "black",
-         loadings.label.vjust = -0.5
-         ) +
-  scale_color_manual(values = c("blue","purple","orange")) +
-  scale_fill_manual(values = c("blue","purple","orange")) +
-  theme_minimal()
 
-# It's not perfect, but it's enough for now...
+# Create a biplot using autoplot (from ggfortify package)
+autoplot(world_pca,
+         data = world_complete,
+         colour = 'species',
+         loadings = TRUE,
+         loadings.label = TRUE) + # shows loadings of each variable
+  theme_minimal() # can customize just like ggplot
+
+
+# autoplot(penguin_pca,
+#         data = penguin_complete,
+#         loadings = TRUE,
+ #        colour = 'species',
+  #       loadings.label = TRUE,
+   #      loadings.colour = "black",
+    #     loadings.label.colour = "black",
+     #    loadings.label.vjust = -0.5
+     #    ) +
+#  scale_color_manual(values = c("blue","purple","orange")) +
+ # scale_fill_manual(values = c("blue","purple","orange")) +
+  #theme_minimal()
 
 # Variance explained by each PC
-screeplot(penguin_pca, type = "lines")
+screeplot(world_pca, type = "lines")
 
 # See the loadings (weighting for each principal component)
-penguin_pca$rotation
+world_pca$rotation
 
 ```
 
