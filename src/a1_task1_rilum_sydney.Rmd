@@ -34,7 +34,7 @@ yellow_frog_count <- frogs %>%
   summarize(total_count = sum(amphibian_number, na.rm = TRUE))  # add up total counts for each life stage each year
 
 
-# Create a graph of total mountain yellow-legged frog counts each year by life stage 
+# Create a bar graph of total mountain yellow-legged frog counts each year by life stage 
 graph_a <- ggplot(data = yellow_frog_count, aes(x = year, y = total_count)) +
   geom_col(aes(fill = amphibian_life_stage)) +
   facet_wrap(~ amphibian_life_stage) +
@@ -77,4 +77,4 @@ graph_a / graph_b & theme_minimal() +
 
 
 
-Data Citation: [Knapp, R.A., C. Pavelka, E.E. Hegeman, and T.C. Smith. 2020. The Sierra Lakes Inventory Project: Non-Native fish and community composition of lakes and ponds in the Sierra Nevada, California ver 2. Environmental Data Initiative.](https://doi.org/10.6073/pasta/d835832d7fd00d9e4466e44eea87fab3)
+**Data Citation:** [Knapp, R.A., C. Pavelka, E.E. Hegeman, and T.C. Smith. 2020. The Sierra Lakes Inventory Project: Non-Native fish and community composition of lakes and ponds in the Sierra Nevada, California ver 2. Environmental Data Initiative.](https://doi.org/10.6073/pasta/d835832d7fd00d9e4466e44eea87fab3)

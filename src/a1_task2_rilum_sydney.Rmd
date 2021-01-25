@@ -1,5 +1,5 @@
 ---
-title: "Principal Components Analysis of Environmental and Climatic Variables"
+title: "Principal Components Analysis of World Environmental and Climatic Variables"
 author: "Sydney Rilum"
 date: "1/16/2021"
 output: html_document
@@ -11,14 +11,13 @@ library(tidyverse)
 library(janitor)
 library(here)
 library(ggfortify) # for PCA biplot
+library(plotly) # for interactive graphs
 
 ```
 
 ## Introduction
 
-This report performs a principal components analysis (PCA) on various environmental and climatic variables across countries worldwide. PCA is an ordination method that simplifies understanding and analysis of multivariate relationships by approximating original multidimensional space and reducing it to a two dimensional visualization called a biplot.
-The data was compiled and provided by @zander_venter on Kaggle and acquired from publicly available remote sensing datasets uploaded to Google Earth Engine. The variables were calculated by taking the mean value for each country at a reduction scale of about 10km. 
-
+In this report, a principal components analysis (PCA) is conducted on various environmental and climatic variables for countries worldwide. PCA is an ordination method that simplifies understanding and analysis of multivariate relationships by approximating original multidimensional space and reducing it to a two-dimensional visualization called a biplot. The data was compiled and provided by Zander Venter on [Kaggle](https://www.kaggle.com/zanderventer) and acquired from publicly available remote sensing datasets uploaded to [Google Earth Engine](https://earthengine.google.com/). The variables were calculated by taking the mean value for each country at a reduction scale of about 10km. The resulting biplot is utilized to determine correlations between variables.
 
 ## Principal Components Analysis (PCA)
 
@@ -42,8 +41,16 @@ world_pca <- world_envi %>%
 world_complete <- world_envi %>% 
   drop_na()
 
+# See the loadings (weighting for each principal component)
+world_pca$rotation
+
+```
+
+## PCA Biplot
+
+```{r}
 # Create a PCA biplot using `autoplot()` function (from ggfortify package)
-autoplot(world_pca,
+world_biplot <- autoplot(world_pca,
          data = world_complete,
          colour = 'country',
          loadings = TRUE,
@@ -54,41 +61,35 @@ autoplot(world_pca,
   theme_minimal() +
   theme(legend.position = "none")
 
-# See the loadings (weighting for each principal component)
-world_pca$rotation
+# Make the graph interactive
+ggplotly(world_biplot)
+
 ```
 
-**Figure 1.** Biplot results for the PCA performed on various environmental and climatic variables (indicated by arrows). Length of the line/arrow indicates variance in each principal component (PC1 and PC2) direction, with longer lengths indicating larger variance and the angle between the arrows indicating correlation. The points represent each country included in the study, with the closer the points are to each other the more similar overall in multivariate space.
+**Figure 1.** Biplot results for the PCA performed on various environmental and climatic variables (indicated by labeled arrows). The length of the line/arrow indicates variance in each principal component (PC1 and PC2) direction, with longer lengths indicating larger variance and the angle between the arrows indicating correlation. The points on the interactive biplot represent each country included in the study (hover over each point to see country name), and the closer the points are to each other the more similar the countries are overall in multivariate space. Data: compiled and provided by Zander Venter on [Kaggle](https://www.kaggle.com/zanderventer) and acquired through [Google Earth Engine](https://earthengine.google.com/).
 
+## Biplot Summary
 
-## Summary
+Variables that are highly positively correlated have a 0 degree angle between their arrows, such as for:
 
-3)  A brief summary (nicely formatted and professionally written bulletpoints are fine) highlighting some major takeaways from your PCA that can be gleaned from the biplot
+-   cloudiness and driest month
 
-Biplot results:
+-   elevation and wind
 
-The following variables are highly positively correlated, as the angle between their arrows are close to 0 degrees:
-- cloudiness and driest month (least amount of rain)
-- elevation and wind
-- tree canopy cover and ?????????
+Variables that are highly negatively correlated have a 180 degree angle between their arrows, such as for:
 
-The following variables are highly negatively correlated, as the angle between their arrows are close to 180 degrees:
-- wettest month (rain) and annual temperature range
-- 
+-   wettest month (most rain) and annual temperature range
 
-The following variables are not very correlated since the angle between their arrows are close to 90 or 270 degrees:
-- slope and annual temperature range
-- temperature seasonality and rain seasonality
-- cropland cover and diurnal temperature range
-- temperature max warmest month and wettest month/mean annual range
-- tree canopy cover and warmest month 
+-   isothermality and temperature seasonality
 
+Variables that are not very correlated have an angle between their arrows close to 90 or 270 degrees, such as for:
 
+-   slope and annual temperature range
 
+-   temperature seasonality and rain seasonality
 
+-   cropland cover and diurnal temperature range
 
+-   tree canopy cover and warmest month
 
-
-
-
-
+The closer the countries (points) on the biplot are to each other, the more similar they are in regard to all environmental and climatic variables.
