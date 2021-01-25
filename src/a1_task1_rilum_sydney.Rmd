@@ -37,7 +37,7 @@ yellow_frog_count <- frogs %>%
 # Create a bar graph of total mountain yellow-legged frog counts each year by life stage 
 graph_a <- ggplot(data = yellow_frog_count, aes(x = year, y = total_count)) +
   geom_col(aes(fill = amphibian_life_stage)) +
-  facet_wrap(~ amphibian_life_stage) +
+  facet_wrap(~ amphibian_life_stage, scales = "free") +
   scale_color_manual(aes(amphibian_life_stage = c("darkorange","springgreen4", "cornflowerblue"))) +
   labs(x = "Year",
        y = "Total Count",
@@ -73,7 +73,7 @@ graph_a / graph_b & theme_minimal() +
 
 ```
 
-**Figure 1.** The top bar graph displays the total mountain yellow-legged frog (*Rana muscosa*) count across all water bodies, by life stage (adult, subadult, and tadpole) and for each year in the study (1995-1997, 2000-2002). The bottom column graph illustrates the top five lakes with the largest total mountain yellow-legged frog count (excluding frogs in the tadpole life stage) over all years of the study. Data: Knapp et al. (2020).
+**Figure 1.** The top bar graph displays the total mountain yellow-legged frog (*Rana muscosa*) count across all water bodies, by life stage (adult, subadult, and tadpole) and for each year in the study (1995-1997, 2000-2002). Note that the total frog count scale varies for each life stage for count clarity. The bottom column graph illustrates the top five lakes with the largest total mountain yellow-legged frog count (excluding frogs in the tadpole life stage) over all years of the study. Data: Knapp et al. (2020).
 
 
 
